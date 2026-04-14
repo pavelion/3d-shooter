@@ -150,6 +150,47 @@
       transform: scale(1.05);
     }
 
+    /* ===== CHANGELOG ===== */
+    .changelog-section {
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .changelog-section h2 {
+      margin-top: 10px;
+    }
+
+    .changelog-section h2:first-child {
+      margin-top: 0;
+    }
+
+    .version-date {
+      color: #777;
+      font-size: 0.5rem;
+      font-weight: normal;
+    }
+
+    .changelog {
+      list-style: none;
+      padding: 0;
+      font-size: 0.45rem;
+      color: #aaa;
+      line-height: 2;
+    }
+
+    .changelog li::before {
+      content: '+ ';
+      color: #66cc66;
+    }
+
+    .version-tag {
+      position: fixed;
+      bottom: 10px;
+      right: 15px;
+      font-size: 0.4rem;
+      color: #555;
+    }
+
     /* ===== HUD ===== */
     #hud {
       pointer-events: none;
@@ -389,6 +430,26 @@
     </div>
 
     <button id="startBtn">START GAME</button>
+
+    <div class="menu-section changelog-section">
+      <h2>v1.1.0 <span class="version-date">2026-04-14</span></h2>
+      <ul class="changelog">
+        <li>Added pause menu (ESC key) with resume and quit</li>
+        <li>Added version and changelog display</li>
+        <li>Deployed to GitHub Pages</li>
+      </ul>
+      <h2>v1.0.0 <span class="version-date">2026-04-14</span></h2>
+      <ul class="changelog">
+        <li>Initial release</li>
+        <li>4-player local multiplayer with bots</li>
+        <li>3 weapons: Pistol, Shotgun, Rocket</li>
+        <li>Random arena platform generation</li>
+        <li>Health pickups and weapon crates</li>
+        <li>Gamepad and mobile touch support</li>
+      </ul>
+    </div>
+
+    <div class="version-tag">v1.1.0</div>
   </div>
 
   <!-- HUD -->
