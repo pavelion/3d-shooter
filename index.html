@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Block Arena - 3D Multiplayer Shooter</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      overflow: hidden;
+      background: #111;
+      font-family: 'Press Start 2P', monospace;
+      color: #fff;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    #gameCanvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      touch-action: none;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .overlay > * { pointer-events: auto; }
+
+    .overlay.hidden { display: none; }
+
+    /* ===== MENU ===== */
+    #menu {
+      background: rgba(0,0,0,0.92);
+    }
+
+    #menu h1 {
+      font-size: 2.2rem;
+      color: #ffcc00;
+      text-shadow: 3px 3px 0 #ff6600, 6px 6px 0 #cc0000;
+      margin-bottom: 30px;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    #menu h1 span {
+      display: block;
+      font-size: 1rem;
+      color: #aaa;
+      text-shadow: none;
+      margin-top: 10px;
+    }
+
+    .menu-section {
+      background: rgba(255,255,255,0.05);
+      border: 2px solid #333;
+      border-radius: 8px;
+      padding: 20px 30px;
+      margin: 10px 0;
+      max-width: 600px;
+      width: 90%;
+    }
+
+    .menu-section h2 {
+      font-size: 0.75rem;
+      color: #ffcc00;
+      margin-bottom: 15px;
+    }
+
+    .player-count-btns,
+    .bot-diff-btns {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    .player-count-btns button,
+    .bot-diff-btns button {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1.2rem;
+      padding: 15px 25px;
+      border: 3px solid #555;
+      background: #222;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+
+    .player-count-btns button:hover,
+    .player-count-btns button.selected,
+    .bot-diff-btns button:hover,
+    .bot-diff-btns button.selected {
+      border-color: #ffcc00;
+      background: #332200;
+      color: #ffcc00;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      font-size: 0.5rem;
+      line-height: 1.8;
+    }
+
+    .controls-grid .player-controls {
+      padding: 8px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .controls-grid .player-controls h3 {
+      font-size: 0.55rem;
+      margin-bottom: 5px;
+    }
+
+    .p1-color { color: #6699ff; }
+    .p2-color { color: #ff6666; }
+    .p3-color { color: #66cc66; }
+    .p4-color { color: #ffcc44; }
+
+    #startBtn {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1rem;
+      padding: 18px 50px;
+      margin-top: 20px;
+      background: #ffcc00;
+      color: #000;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+
+    #startBtn:hover {
+      background: #ffdd44;
+      transform: scale(1.05);
+    }
+
+    /* ===== HUD ===== */
+    #hud {
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    #scorePanel {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 20px;
+      font-size: 0.55rem;
+      background: rgba(0,0,0,0.6);
+      padding: 8px 16px;
+      border-radius: 4px;
+      border: 1px solid #333;
+    }
+
+    .score-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .score-color {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+    }
+
+    #timer {
+      position: fixed;
+      top: 10px;
+      right: 15px;
+      font-size: 0.7rem;
+      background: rgba(0,0,0,0.6);
+      padding: 8px 12px;
+      border-radius: 4px;
+      border: 1px solid #333;
+    }
+
+    #killFeed {
+      position: fixed;
+      top: 50px;
+      right: 15px;
+      font-size: 0.45rem;
+      text-align: right;
+      line-height: 2;
+    }
+
+    .kill-msg {
+      animation: fadeOut 3s forwards;
+      background: rgba(0,0,0,0.5);
+      padding: 3px 8px;
+      border-radius: 3px;
+      margin-bottom: 3px;
+    }
+
+    @keyframes fadeOut {
+      0%, 70% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    /* Health bars (positioned in JS) */
+    .health-bar-container {
+      position: fixed;
+      width: 60px;
+      text-align: center;
+      pointer-events: none;
+      transition: left 0.05s, top 0.05s;
+    }
+
+    .health-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: #333;
+      border: 1px solid #555;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .health-bar-fill {
+      height: 100%;
+      transition: width 0.2s;
+      border-radius: 2px;
+    }
+
+    .health-bar-name {
+      font-size: 0.35rem;
+      margin-bottom: 2px;
+      text-shadow: 1px 1px 0 #000;
+    }
+
+    /* ===== GAME OVER ===== */
+    #gameOver {
+      background: rgba(0,0,0,0.88);
+    }
+
+    #gameOver h1 {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+    }
+
+    #gameOver .winner-text {
+      font-size: 1rem;
+      margin-bottom: 30px;
+    }
+
+    #restartBtn {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.8rem;
+      padding: 15px 40px;
+      background: #ffcc00;
+      color: #000;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+
+    #restartBtn:hover {
+      background: #ffdd44;
+      transform: scale(1.05);
+    }
+
+    /* ===== RESPAWN OVERLAY ===== */
+    .respawn-overlay {
+      position: fixed;
+      bottom: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.6rem;
+      color: #ff4444;
+      text-shadow: 2px 2px 0 #000;
+      display: none;
+      z-index: 6;
+    }
+
+    /* ===== CROSSHAIR ===== */
+    #crosshairInfo {
+      position: fixed;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.4rem;
+      color: #888;
+      background: rgba(0,0,0,0.5);
+      padding: 5px 10px;
+      border-radius: 3px;
+      z-index: 5;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- MENU -->
+  <div id="menu" class="overlay">
+    <h1>
+      BLOCK ARENA
+      <span>Local Multiplayer Shooter</span>
+    </h1>
+
+    <div class="menu-section">
+      <h2>PLAYERS</h2>
+      <div class="player-count-btns">
+        <button data-count="1">1</button>
+        <button data-count="2" class="selected">2</button>
+        <button data-count="3">3</button>
+        <button data-count="4">4</button>
+      </div>
+    </div>
+
+    <div class="menu-section">
+      <h2>BOT DIFFICULTY</h2>
+      <div class="bot-diff-btns">
+        <button data-diff="easy">EASY</button>
+        <button data-diff="normal" class="selected">NORMAL</button>
+        <button data-diff="hard">HARD</button>
+      </div>
+    </div>
+
+    <div class="menu-section">
+      <h2>CONTROLS</h2>
+      <div class="controls-grid">
+        <div class="player-controls">
+          <h3 class="p1-color">P1 - BLUE</h3>
+          Move: W A S D<br>
+          Jump: SPACE<br>
+          Shoot: Q
+        </div>
+        <div class="player-controls">
+          <h3 class="p2-color">P2 - RED</h3>
+          Move: ARROWS<br>
+          Jump: R.SHIFT<br>
+          Shoot: /
+        </div>
+        <div class="player-controls">
+          <h3 class="p3-color">P3 - GREEN</h3>
+          Move: I J K L<br>
+          Jump: U<br>
+          Shoot: O
+        </div>
+        <div class="player-controls">
+          <h3 class="p4-color">P4 - YELLOW</h3>
+          Move: NUM 8 4 5 6<br>
+          Jump: NUM 0<br>
+          Shoot: NUM .
+        </div>
+      </div>
+    </div>
+
+    <button id="startBtn">START GAME</button>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud" class="overlay hidden">
+    <div id="scorePanel"></div>
+    <div id="timer">3:00</div>
+    <div id="killFeed"></div>
+    <div id="healthBars"></div>
+  </div>
+
+  <!-- GAME OVER -->
+  <div id="gameOver" class="overlay hidden">
+    <h1>GAME OVER</h1>
+    <div class="winner-text" id="winnerText"></div>
+    <div id="finalScores" style="font-size:0.55rem;margin-bottom:25px;line-height:2;"></div>
+    <button id="restartBtn">PLAY AGAIN</button>
+  </div>
+
+  <div class="respawn-overlay" id="respawnOverlay"></div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
