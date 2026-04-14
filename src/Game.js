@@ -44,6 +44,7 @@ export class Game {
     this.resize();
     window.addEventListener('resize', () => this.resize());
     this.setupMenu();
+    this.setupPauseMenu();
     window._game = this;
     this.startLoop();
   }
@@ -83,6 +84,41 @@ export class Game {
       const btn1 = document.querySelector('.player-count-btns button[data-count="1"]');
       if (btn1) btn1.classList.add('selected');
     }
+  }
+
+  setupPauseMenu() {
+    document.getElementById('resumeBtn').addEventListener('click', () => this.resumeGame());
+    document.getElementById('quitBtn').addEventListener('click', () => this.quitToMenu());
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Escape') {
+        if (this.gameState === 'playing') {
+          this.pauseGame();
+        } else if (this.gameState === 'paused') {
+          this.resumeGame();
+        }
+      }
+    });
+  }
+
+  pauseGame() {
+    this.gameState = 'paused';
+    document.getElementById('pauseMenu').classList.remove('hidden');
+    document.getElementById('hud').classList.add('hidden');
+  }
+
+  resumeGame() {
+    this.gameState = 'playing';
+    this.lastTime = performance.now();
+    document.getElementById('pauseMenu').classList.add('hidden');
+    document.getElementById('hud').classList.remove('hidden');
+  }
+
+  quitToMenu() {
+    this.gameState = 'menu';
+    document.getElementById('pauseMenu').classList.add('hidden');
+    document.getElementById('hud').classList.add('hidden');
+    document.getElementById('menu').classList.remove('hidden');
   }
 
   startGame() {

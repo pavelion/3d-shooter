@@ -290,6 +290,30 @@
       z-index: 6;
     }
 
+    /* ===== PAUSE MENU ===== */
+    #pauseMenu {
+      background: rgba(0,0,0,0.85);
+      gap: 15px;
+    }
+
+    .pause-btn {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.8rem;
+      padding: 15px 40px;
+      background: #ffcc00;
+      color: #000;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.15s;
+      min-width: 250px;
+    }
+
+    .pause-btn:hover {
+      transform: scale(1.05);
+      filter: brightness(1.2);
+    }
+
     /* ===== CROSSHAIR ===== */
     #crosshairInfo {
       position: fixed;
@@ -381,6 +405,13 @@
     <div class="winner-text" id="winnerText"></div>
     <div id="finalScores" style="font-size:0.55rem;margin-bottom:25px;line-height:2;"></div>
     <button id="restartBtn">PLAY AGAIN</button>
+  </div>
+
+  <!-- PAUSE MENU -->
+  <div id="pauseMenu" class="overlay hidden">
+    <h1 style="font-size:1.5rem; color:#ffcc00; text-shadow:3px 3px 0 #ff6600; margin-bottom:30px;">PAUSED</h1>
+    <button id="resumeBtn" class="pause-btn">RESUME</button>
+    <button id="quitBtn" class="pause-btn" style="background:#cc0000;color:#fff;">QUIT TO MENU</button>
   </div>
 
   <div class="respawn-overlay" id="respawnOverlay"></div>
