@@ -3,11 +3,13 @@ export class InputManager {
     this.keys = {};
     this.justPressed = {};
     window.addEventListener('keydown', (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
       e.preventDefault();
       if (!this.keys[e.code]) this.justPressed[e.code] = true;
       this.keys[e.code] = true;
     });
     window.addEventListener('keyup', (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
       e.preventDefault();
       this.keys[e.code] = false;
     });
